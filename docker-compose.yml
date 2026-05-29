@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  web_app:
+    build: .
+    image: tu-usuario-dockerhub/proyecto-so2:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
