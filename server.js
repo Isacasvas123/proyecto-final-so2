@@ -1,53 +1,91 @@
 const express = require('express');
 const { Pool } = require('pg');
 const app = express();
-const PORT = process.env.PORT || 3000;
+const port = process.env.PORT || 3000;
 
-// Configuración de conexión segura a la Base de Datos
+// Configuración de la conexión a la Base de Datos PostgreSQL
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
-});
-
-// Ruta principal de la aplicación (Frontend)
-app.get('/', async (req, res) => {
-  try {
-    const dbResult = await pool.query('SELECT NOW()');
-    res.send(`
-      <html>
-        <head><title>Proyecto DevOps SO-II</title></head>
-        <body style="font-family: Arial, sans-serif; text-align: center; background-color: #f0f4f8; padding: 50px;">
-          <div style="background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: inline-block;">
-            <h1 style="color: #2c3e50; margin-bottom: 10px;">🚀 Infraestructura DevOps Cloud - BY ISAAC 🚀</h1>
-            <p style="color: #7f8c8d; font-size: 1.2em;">Sistemas Operativos II - Entorno de Producción Functional</p>
-            <hr style="border: 0; height: 1px; background: #eee; margin: 20px 0;">
-            <p><strong>Estado del Contenedor:</strong> <span style="color: #27ae60;">ONLINE (Activo)</span></p>
-            <p><strong>Base de Datos Relacional:</strong> <span style="color: #27ae60;">CONECTADA ✅</span></p>
-            <p style="font-size: 0.9em; color: #95a5a6;">Hora del Servidor Cloud DB: ${dbResult.rows[0].now}</p>
-          </div>
-        </body>
-      </html>
-    `);
-  } catch (err) {
-    res.status(500).send(`
-      <body style="font-family: Arial; text-align: center; padding: 50px;">
-        <h2 style="color: #c0392b;">❌ Error de Infraestructura</h2>
-        <p>No se pudo conectar a la Base de Datos Cloud.</p>
-        <p style="color: #7f8c8d;">Detalle: ${err.message}</p>
-      </body>
-    `);
+  ssl: {
+    rejectUnauthorized: false // Requerido para conexiones seguras en Render
   }
 });
 
-// Endpoint obligatorio de Monitoreo / Healthcheck
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'UP',
-    uptime: process.uptime(),
-    timestamp: new Date()
-  });
+// Endpoint de Salud (/health) para UptimeRobot
+app.get('/health', async (req, res) => {
+  try {
+    // Validamos que la base de datos responda una consulta simple
+    await pool.query('SELECT 1');
+    res.status(200).json({
+      status: "UP",
+      database: "CONNECTED",
+      uptime: process.uptime()
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: "DOWN",
+      database: "DISCONNECTED",
+      error: err.message
+    });
+  }
 });
 
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en el puerto ${PORT}`);
+// Página Principal con tu diseño y el Dashboard de UptimeRobot integrado
+app.get('/', async (req, res) => {
+  let dbStatus = "🟢 Conectada con éxito";
+  try {
+    await pool.query('SELECT 1');
+  } catch (err) {
+    dbStatus = "🔴 Desconectada (" + err.message + ")";
+  }
+
+  // Estructura HTML que se renderiza en el navegador del profesor
+  const htmlContent = `
+  <!DOCTYPE html>
+  <html lang="es">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Proyecto Final - Sistemas Operativos II</title>
+      <style>
+          body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f1f5f9; color: #1e293b; margin: 0; padding: 20px; }
+          .container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+          h1 { color: #0f172a; margin-top: 0; border-bottom: 2px solid #3b82f6; padding-bottom: 10px; }
+          .badge { display: inline-block; padding: 6px 12px; font-weight: bold; border-radius: 6px; font-size: 14px; }
+          .badge-success { background-color: #dcfce7; color: #16a34a; }
+          .info-box { background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; margin: 20px 0; }
+          iframe { width: 100%; height: 500px; border: none; border-radius: 8px; margin-top: 15px; }
+      </style>
+  </head>
+  <body>
+      <div class="container">
+          <h1>🚀 Plataforma Cloud-Native Operacional</h1>
+          <p><strong>Asignatura:</strong> Sistemas Operativos II - Proyecto Final</p>
+          <p><strong>Estudiante:</strong> Ismael Castillo Vasquez (Isacasvas123)</p>
+          
+          <div class="info-box">
+              <h3>⚡ Estado de los Subsistemas:</h3>
+              <p>🌐 <strong>Servidor Web:</strong> <span class="badge badge-success">ONLINE (Render)</span></p>
+              <p>🗄️ <strong>Base de Datos:</strong> <span style="font-weight: bold;">${dbStatus}</span></p>
+          </div>
+
+          <hr style="border: 0; height: 1px; background: #e2e8f0; margin: 30px 0;">
+
+          <h3 style="color: #0f172a; display: flex; align-items: center; gap: 10px;">📊 Panel de Observabilidad SRE en Tiempo Real</h3>
+          <p style="color: #64748b; font-size: 14px; margin-bottom: 10px;">Métricas de disponibilidad global auditadas de forma sintética por agentes de monitoreo externos.</p>
+          
+          <div style="border: 1px solid #cbd5e1; border-radius: 10px; overflow: hidden; background-color: #fafafa;">
+              <iframe src="https://stats.uptimerobot.com/XZ1xCokgfs"></iframe>
+          </div>
+      </div>
+  </body>
+  </html>
+  `;
+  
+  res.send(htmlContent);
+});
+
+// Inicialización del Servidor Lógico
+app.listen(port, () => {
+  console.log(`Servidor corriendo en el puerto ${port}`);
 });
