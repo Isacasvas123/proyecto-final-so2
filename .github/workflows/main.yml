@@ -1,0 +1,17 @@
+name: Deploy Corporativo a Render Cloud
+
+on:
+  push:
+    branches: [ "main" ] # Se activa automáticamente con cada cambio guardado
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Clonar codigo fuente del Repositorio
+      uses: actions/checkout@v4
+
+    - name: Ejecutar disparador de Entrega Continua (CD)
+      run: |
+        curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
