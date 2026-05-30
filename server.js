@@ -1,127 +1,53 @@
-res.send(`
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard DevOps</title>
+const express = require('express');
+const { Pool } = require('pg');
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-<style>
-body{
-    margin:0;
-    font-family:Segoe UI, sans-serif;
-    background:#0f172a;
-    color:white;
-}
-
-.header{
-    background:#1e293b;
-    padding:20px;
-    text-align:center;
-    border-bottom:2px solid #334155;
-}
-
-.header h1{
-    margin:0;
-    color:#38bdf8;
-}
-
-.container{
-    max-width:1200px;
-    margin:auto;
-    padding:30px;
-}
-
-.grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-    gap:20px;
-}
-
-.card{
-    background:#1e293b;
-    padding:25px;
-    border-radius:15px;
-    box-shadow:0 0 15px rgba(0,0,0,.3);
-}
-
-.card h2{
-    margin-top:0;
-    color:#38bdf8;
-}
-
-.online{
-    color:#22c55e;
-    font-weight:bold;
-}
-
-.footer{
-    text-align:center;
-    margin-top:30px;
-    color:#94a3b8;
-}
-</style>
-</head>
-
-<body>
-
-<div class="header">
-    <h1>🚀 Infraestructura DevOps Cloud</h1>
-    <p>Sistemas Operativos II - Proyecto Final</p>
-</div>
-
-<div class="container">
-
-    <div class="grid">
-
-        <div class="card">
-            <h2>🐳 Contenedor Docker</h2>
-            <p class="online">● ONLINE</p>
-            <p>Aplicación Node.js funcionando correctamente.</p>
-        </div>
-
-        <div class="card">
-            <h2>🗄️ PostgreSQL</h2>
-            <p class="online">● CONECTADA</p>
-            <p>Base de datos disponible.</p>
-        </div>
-
-        <div class="card">
-            <h2>📈 Uptime</h2>
-            <p class="online">● ACTIVO</p>
-            <p id="uptime">Cargando...</p>
-        </div>
-
-        <div class="card">
-            <h2>⏰ Hora Cloud</h2>
-            <p>${dbResult.rows[0].now}</p>
-        </div>
-
-    </div>
-
-    <div class="card" style="margin-top:20px;">
-        <h2>📊 Estado General</h2>
-        <p>Todos los servicios operando normalmente.</p>
-        <p>Monitoreo continuo mediante Health Check.</p>
-    </div>
-
-</div>
-
-<div class="footer">
-    Proyecto DevOps - Docker + Node.js + PostgreSQL + Monitoreo
-</div>
-
-<script>
-fetch('/health')
-.then(r => r.json())
-.then(data => {
-    const horas = (data.uptime / 3600).toFixed(2);
-
-    document.getElementById('uptime').innerHTML =
-        horas + ' horas de actividad';
+// Configuración de conexión segura a la Base de Datos
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
 });
-</script>
 
-</body>
-</html>
-`);
+// Ruta principal de la aplicación (Frontend)
+app.get('/', async (req, res) => {
+  try {
+    const dbResult = await pool.query('SELECT NOW()');
+    res.send(`
+      <html>
+        <head><title>Proyecto DevOps SO-II</title></head>
+        <body style="font-family: Arial, sans-serif; text-align: center; background-color: #f0f4f8; padding: 50px;">
+          <div style="background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: inline-block;">
+            <h1 style="color: #2c3e50; margin-bottom: 10px;">🚀 Infraestructura DevOps Cloud 🚀</h1>
+            <p style="color: #7f8c8d; font-size: 1.2em;">Sistemas Operativos II - Entorno de Producción Functional</p>
+            <hr style="border: 0; height: 1px; background: #eee; margin: 20px 0;">
+            <p><strong>Estado del Contenedor:</strong> <span style="color: #27ae60;">ONLINE (Activo)</span></p>
+            <p><strong>Base de Datos Relacional:</strong> <span style="color: #27ae60;">CONECTADA ✅</span></p>
+            <p style="font-size: 0.9em; color: #95a5a6;">Hora del Servidor Cloud DB: ${dbResult.rows[0].now}</p>
+          </div>
+        </body>
+      </html>
+    `);
+  } catch (err) {
+    res.status(500).send(`
+      <body style="font-family: Arial; text-align: center; padding: 50px;">
+        <h2 style="color: #c0392b;">❌ Error de Infraestructura</h2>
+        <p>No se pudo conectar a la Base de Datos Cloud.</p>
+        <p style="color: #7f8c8d;">Detalle: ${err.message}</p>
+      </body>
+    `);
+  }
+});
+
+// Endpoint obligatorio de Monitoreo / Healthcheck
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'UP',
+    uptime: process.uptime(),
+    timestamp: new Date()
+  });
+});
+
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en el puerto ${PORT}`);
+});
