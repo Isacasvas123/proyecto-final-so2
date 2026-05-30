@@ -1,0 +1,22 @@
+name: Deploy Corporativo a Render Cloud
+
+on:
+  push:
+    branches: [ "main" ] # Se activa cada vez que guardas cambios en la rama main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Clonar código fuente del Repositorio
+      uses: actions/checkout@v4
+
+    - name: Configurar entorno de Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-size: 20
+
+    - name: Ejecutar disparador de Entrega Continua (CD)
+      run: |
+        curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
