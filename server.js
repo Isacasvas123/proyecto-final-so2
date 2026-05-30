@@ -18,7 +18,7 @@ app.get('/', async (req, res) => {
         <head><title>Proyecto DevOps SO-II</title></head>
         <body style="font-family: Arial, sans-serif; text-align: center; background-color: #f0f4f8; padding: 50px;">
           <div style="background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: inline-block;">
-            <h1 style="color: #2c3e50; margin-bottom: 10px;">🚀 Infraestructura DevOps Cloud - BY ISA 🚀</h1>
+            <h1 style="color: #2c3e50; margin-bottom: 10px;">🚀 Infraestructura DevOps Cloud - BY ISA ING SISTEMAS 🚀</h1>
             <p style="color: #7f8c8d; font-size: 1.2em;">Sistemas Operativos II - Entorno de Producción Functional - Proyecto Final</p>
             <hr style="border: 0; height: 1px; background: #eee; margin: 20px 0;">
             <p><strong>Estado del Contenedor:</strong> <span style="color: #27ae60;">ONLINE (Activo)</span></p>
