@@ -70,7 +70,7 @@ app.get('/', async (req, res) => {
   <body>
 
       <div class="navbar">
-          <h2>🏢 ICV DEVOPS SOLUTIONS v2.0</h2>
+          <h2>🏢 ICV DEVOPS SOLUTIONS </h2>
           <span class="badge-env">PROD ENVIRONMENT</span>
       </div>
 
