@@ -81,7 +81,7 @@ app.get('/', async (req, res) => {
                   Bienvenido al centro de mando operativo de <strong>ICV DevOps Solutions</strong>. Esta plataforma gestiona, orquesta y audita de forma automatizada los recursos lógicos, contenedores e integraciones de bases de datos para arquitecturas microservicios corporativas de alta demanda.
               </p>
               <p style="font-size: 13px; color: #6366f1; margin-bottom: 0;">
-                  <strong>Ingeniero de Infraestructura a Cargo:</strong> Ismael Castillo Vasquez | Dirección de Operaciones SRE
+                  <strong>Ingeniero de Infraestructura a Cargo:</strong> Isaac Castillo Vasquez | Dirección de Operaciones SRE
               </p>
           </div>
 
